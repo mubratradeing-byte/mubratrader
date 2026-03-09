@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUBRA FX — Elite Trading Hub</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────────────────
+    const firebaseConfig = {
+      apiKey:            "YOUR_API_KEY",
+      authDomain:        "YOUR_AUTH_DOMAIN",
+      projectId:         "YOUR_PROJECT_ID",
+      storageBucket:     "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId:             "YOUR_APP_ID"
+    };
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Expose to global scope for script.js
+    window._auth   = auth;
+    window._signIn = (email, pw) => signInWithEmailAndPassword(auth, email, pw);
+    window._signUp = (email, pw) => createUserWithEmailAndPassword(auth, email, pw);
+    window._signOut = () => signOut(auth);
+    window._onAuthStateChanged = (cb) => onAuthStateChanged(auth, cb);
+  </script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-bg-grid"></div>
+  <div class="auth-card glass">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="wolf-logo">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,10 80,30 90,60 70,85 30,85 10,60 20,30" fill="none" stroke="#39FF14" stroke-width="2"/>
+          <polygon points="50,18 72,34 80,58 63,78 37,78 20,58 28,34" fill="none" stroke="#39FF14" stroke-width="1" opacity="0.5"/>
+          <!-- Wolf face simplified geometric -->
+          <polygon points="50,25 62,35 58,50 42,50 38,35" fill="#0d1a0d" stroke="#39FF14" stroke-width="1.5"/>
+          <circle cx="44" cy="40" r="3" fill="#39FF14"/>
+          <circle cx="56" cy="40" r="3" fill="#39FF14"/>
+          <polygon points="50,48 44,58 56,58" fill="#39FF14"/>
+          <!-- Ears -->
+          <polygon points="38,35 32,22 44,30" fill="#39FF14" opacity="0.8"/>
+          <polygon points="62,35 68,22 56,30" fill="#39FF14" opacity="0.8"/>
+          <!-- Outer ring decoration -->
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#39FF14" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="auth-brand">
+        <span class="brand-main">MUBRA</span>
+        <span class="brand-sub">FX</span>
+      </div>
+    </div>
+
+    <p class="auth-tagline">Elite Trading Intelligence Platform</p>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="tab-btn active" data-tab="login">LOGIN</button>
+      <button class="tab-btn" data-tab="register">REGISTER</button>
+    </div>
+
+    <div id="auth-error" class="auth-error hidden"></div>
+
+    <!-- Login Form -->
+    <div id="tab-login" class="auth-form">
+      <div class="input-group">
+        <span class="input-icon">⬡</span>
+        <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" />
+      </div>
+      <div class="input-group">
+        <span class="input-icon">⬡</span>
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+      </div>
+      <button id="btn-login" class="btn-primary">
+        <span class="btn-text">ENTER HUB</span>
+        <span class="btn-glow"></span>
+      </button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="tab-register" class="auth-form hidden">
+      <div class="input-group">
+        <span class="input-icon">⬡</span>
+        <input type="email" id="reg-email" placeholder="Email Address" autocomplete="email" />
+      </div>
+      <div class="input-group">
+        <span class="input-icon">⬡</span>
+        <input type="password" id="reg-password" placeholder="Password (min 6 chars)" autocomplete="new-password" />
+      </div>
+      <button id="btn-register" class="btn-primary">
+        <span class="btn-text">CREATE ACCOUNT</span>
+        <span class="btn-glow"></span>
+      </button>
+    </div>
+
+    <p class="auth-footer-note">Access restricted to authorized traders</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MAIN DASHBOARD
+═══════════════════════════════════════════════════════════════════════════ -->
+<div id="dashboard" class="dashboard hidden">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <div class="wolf-logo wolf-logo--sm">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,10 80,30 90,60 70,85 30,85 10,60 20,30" fill="none" stroke="#39FF14" stroke-width="2"/>
+            <polygon points="50,18 72,34 80,58 63,78 37,78 20,58 28,34" fill="none" stroke="#39FF14" stroke-width="1" opacity="0.5"/>
+            <polygon points="50,25 62,35 58,50 42,50 38,35" fill="#0d1a0d" stroke="#39FF14" stroke-width="1.5"/>
+            <circle cx="44" cy="40" r="3" fill="#39FF14"/>
+            <circle cx="56" cy="40" r="3" fill="#39FF14"/>
+            <polygon points="50,48 44,58 56,58" fill="#39FF14"/>
+            <polygon points="38,35 32,22 44,30" fill="#39FF14" opacity="0.8"/>
+            <polygon points="62,35 68,22 56,30" fill="#39FF14" opacity="0.8"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#39FF14" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <span class="brand-main">MUBRA</span><span class="brand-sub">FX</span>
+        </div>
+        <span class="status-pill">LIVE</span>
+      </div>
+
+      <nav class="site-nav">
+        <a href="#tools"     class="nav-link">Tools</a>
+        <a href="#calendar"  class="nav-link">Calendar</a>
+        <a href="#resources" class="nav-link">Resources</a>
+        <a href="#promos"    class="nav-link">Promos</a>
+        <a href="#ai-chat"   class="nav-link">AI Chat</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="social-icons">
+          <a href="#" class="social-icon" title="Telegram" aria-label="Telegram">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.667l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.978.892z"/></svg>
+          </a>
+          <a href="#" class="social-icon" title="YouTube" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+          </a>
+          <a href="#" class="social-icon" title="Instagram" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </a>
+          <a href="#" class="social-icon" title="X / Twitter" aria-label="X Twitter">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
+        <div class="user-info">
+          <span id="user-email-display" class="user-email"></span>
+          <button id="btn-logout" class="btn-logout">LOGOUT</button>
+        </div>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MOBILE NAV ──────────────────────────────────────────────────────── -->
+  <div id="mobile-nav" class="mobile-nav hidden">
+    <a href="#tools"     class="nav-link" onclick="closeMobileNav()">Tools</a>
+    <a href="#calendar"  class="nav-link" onclick="closeMobileNav()">Calendar</a>
+    <a href="#resources" class="nav-link" onclick="closeMobileNav()">Resources</a>
+    <a href="#promos"    class="nav-link" onclick="closeMobileNav()">Promos</a>
+    <a href="#ai-chat"   class="nav-link" onclick="closeMobileNav()">AI Chat</a>
+  </div>
+
+  <!-- ── HERO ───────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge">PROFESSIONAL GRADE</div>
+      <h1 class="hero-title">
+        <span class="hero-word">TRADE</span>
+        <span class="hero-word accent">SMARTER.</span>
+      </h1>
+      <p class="hero-sub">Risk calculators · Market calendar · Indicators · Prop firm promos — all in one elite hub.</p>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-val" data-count="12">0</span><span class="stat-label">Tools</span></div>
+        <div class="stat"><span class="stat-val" data-count="50">0</span>+<span class="stat-label">Indicators</span></div>
+        <div class="stat"><span class="stat-val" data-count="5">0</span><span class="stat-label">Prop Partners</span></div>
+      </div>
+    </div>
+    <div class="hero-chart">
+      <canvas id="hero-chart" width="400" height="180"></canvas>
+    </div>
+  </section>
+
+  <!-- ── TOOLS SECTION ──────────────────────────────────────────────────── -->
+  <section id="tools" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">TRADING <span class="accent">TOOLS</span></h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="tools-grid">
+        <!-- Crypto Calculator -->
+        <div class="tool-card glass">
+          <div class="tool-card-header">
+            <div class="tool-icon">₿</div>
+            <div>
+              <h3 class="tool-title">Crypto Position Calculator</h3>
+              <p class="tool-desc">Bybit / MEXC optimized</p>
+            </div>
+          </div>
+          <div class="calc-form">
+            <div class="form-row">
+              <label>Account Balance (USDT)</label>
+              <input type="number" id="crypto-balance" placeholder="e.g. 1000" />
+            </div>
+            <div class="form-row">
+              <label>Risk Amount (USDT)</label>
+              <input type="number" id="crypto-risk" placeholder="e.g. 20" />
+            </div>
+            <div class="form-row">
+              <label>Entry Price</label>
+              <input type="number" id="crypto-entry" placeholder="e.g. 65000" />
+            </div>
+            <div class="form-row">
+              <label>Stop Loss Price</label>
+              <input type="number" id="crypto-sl" placeholder="e.g. 64000" />
+            </div>
+            <button class="btn-calc" onclick="calcCrypto()">
+              <span>CALCULATE</span>
+            </button>
+            <div id="crypto-result" class="calc-result hidden">
+              <div class="result-row">
+                <span class="result-label">Position Size</span>
+                <span id="crypto-pos-size" class="result-val">—</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Leverage</span>
+                <span id="crypto-leverage" class="result-val">—</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Risk %</span>
+                <span id="crypto-risk-pct" class="result-val">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Forex Calculator -->
+        <div class="tool-card glass">
+          <div class="tool-card-header">
+            <div class="tool-icon">Fx</div>
+            <div>
+              <h3 class="tool-title">Forex Lot Size Calculator</h3>
+              <p class="tool-desc">Standard / Mini / Micro lots</p>
+            </div>
+          </div>
+          <div class="calc-form">
+            <div class="form-row">
+              <label>Account Balance ($)</label>
+              <input type="number" id="forex-balance" placeholder="e.g. 5000" />
+            </div>
+            <div class="form-row">
+              <label>Risk Amount ($)</label>
+              <input type="number" id="forex-risk" placeholder="e.g. 50" />
+            </div>
+            <div class="form-row">
+              <label>Stop Loss (Pips)</label>
+              <input type="number" id="forex-sl-pips" placeholder="e.g. 20" />
+            </div>
+            <div class="form-row">
+              <label>Currency Pair</label>
+              <select id="forex-pair">
+                <option value="usd">USD Pairs (USD/xxx)</option>
+                <option value="eur">EUR Pairs</option>
+                <option value="jpy">JPY Pairs (x0.01)</option>
+              </select>
+            </div>
+            <button class="btn-calc" onclick="calcForex()">
+              <span>CALCULATE</span>
+            </button>
+            <div id="forex-result" class="calc-result hidden">
+              <div class="result-row">
+                <span class="result-label">Standard Lots</span>
+                <span id="forex-std" class="result-val">—</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Mini Lots</span>
+                <span id="forex-mini" class="result-val">—</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Micro Lots</span>
+                <span id="forex-micro" class="result-val">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk/Reward Calculator -->
+        <div class="tool-card glass">
+          <div class="tool-card-header">
+            <div class="tool-icon">R:R</div>
+            <div>
+              <h3 class="tool-title">Risk/Reward Analyzer</h3>
+              <p class="tool-desc">Trade quality scoring</p>
+            </div>
+          </div>
+          <div class="calc-form">
+            <div class="form-row">
+              <label>Entry Price</label>
+              <input type="number" id="rr-entry" placeholder="e.g. 1.0800" step="0.0001" />
+            </div>
+            <div class="form-row">
+              <label>Stop Loss</label>
+              <input type="number" id="rr-sl" placeholder="e.g. 1.0750" step="0.0001" />
+            </div>
+            <div class="form-row">
+              <label>Take Profit</label>
+              <input type="number" id="rr-tp" placeholder="e.g. 1.0950" step="0.0001" />
+            </div>
+            <div class="form-row">
+              <label>Direction</label>
+              <select id="rr-dir">
+                <option value="long">LONG</option>
+                <option value="short">SHORT</option>
+              </select>
+            </div>
+            <button class="btn-calc" onclick="calcRR()">
+              <span>CALCULATE</span>
+            </button>
+            <div id="rr-result" class="calc-result hidden">
+              <div class="result-row">
+                <span class="result-label">R:R Ratio</span>
+                <span id="rr-ratio" class="result-val">—</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Grade</span>
+                <span id="rr-grade" class="result-val">—</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Pips / Points</span>
+                <span id="rr-pips" class="result-val">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ECONOMIC CALENDAR ───────────────────────────────────────────────── -->
+  <section id="calendar" class="section section--dark">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">ECONOMIC <span class="accent">CALENDAR</span></h2>
+        <div class="section-line"></div>
+        <p class="section-sub">High & Medium impact events — real-time data</p>
+      </div>
+      <div class="calendar-wrap glass">
+        <!-- TradingView Economic Calendar Widget -->
+        <div class="tradingview-widget-container" style="height:600px">
+          <iframe
+            src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone&countries=25,32,6,37,72,22,17,39,14,10,35,43,56&calType=day&timeZone=0&lang=1"
+            width="100%"
+            height="600"
+            frameborder="0"
+            allowtransparency="true"
+            marginwidth="0"
+            marginheight="0"
+            style="border-radius:12px;"
+            title="Economic Calendar"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RESOURCES ──────────────────────────────────────────────────────── -->
+  <section id="resources" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">DIGITAL <span class="accent">RESOURCES</span></h2>
+        <div class="section-line"></div>
+      </div>
+
+      <!-- Indicators -->
+      <div class="resources-block">
+        <h3 class="block-title">
+          <span class="block-icon">⬡</span> Free Indicators
+        </h3>
+        <div class="resource-grid" id="indicator-grid">
+          <!-- Dynamically populated from script.js -->
+        </div>
+      </div>
+
+      <!-- PDF Library -->
+      <div class="resources-block">
+        <h3 class="block-title">
+          <span class="block-icon">⬡</span> Trading Book Library
+        </h3>
+        <div class="resource-grid" id="pdf-grid">
+          <!-- Dynamically populated from script.js -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROMO HUB ──────────────────────────────────────────────────────── -->
+  <section id="promos" class="section section--dark">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">PROMO <span class="accent">HUB</span></h2>
+        <div class="section-line"></div>
+        <p class="section-sub">Exclusive partner codes — one-click copy</p>
+      </div>
+
+      <!-- Prop Firms -->
+      <h3 class="block-title"><span class="block-icon">⬡</span> Prop Firms</h3>
+      <div class="promo-grid" id="prop-grid"></div>
+
+      <!-- Exchanges -->
+      <h3 class="block-title" style="margin-top:3rem;"><span class="block-icon">⬡</span> Exchanges</h3>
+      <div class="promo-grid" id="exchange-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── AI CHAT PLACEHOLDER ────────────────────────────────────────────── -->
+  <section id="ai-chat" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">AI <span class="accent">ASSISTANT</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="ai-chat-placeholder glass">
+        <div class="ai-icon">🤖</div>
+        <h3>Mubra AI — Trading Intelligence</h3>
+        <p>Your personal AI trading assistant powered by Chatbase. Ask about strategies, setups, market analysis, and more.</p>
+        <div class="ai-code-note">
+          <code>
+            &lt;!-- Paste your Chatbase widget script below --&gt;<br/>
+            &lt;script&gt;<br/>
+            &nbsp;&nbsp;window.embeddedChatbotConfig = &#123;<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;chatbotId: "YOUR_CHATBASE_ID",<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;domain: "www.chatbase.co"<br/>
+            &nbsp;&nbsp;&#125;<br/>
+            &lt;/script&gt;<br/>
+            &lt;script src="https://www.chatbase.co/embed.min.js" ..&gt;&lt;/script&gt;
+          </code>
+        </div>
+        <p class="ai-note">Replace the placeholder above in <strong>index.html</strong> near the closing &lt;/body&gt; tag.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="wolf-logo wolf-logo--xs">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,10 80,30 90,60 70,85 30,85 10,60 20,30" fill="none" stroke="#39FF14" stroke-width="2"/>
+            <polygon points="50,25 62,35 58,50 42,50 38,35" fill="#0d1a0d" stroke="#39FF14" stroke-width="1.5"/>
+            <circle cx="44" cy="40" r="3" fill="#39FF14"/>
+            <circle cx="56" cy="40" r="3" fill="#39FF14"/>
+            <polygon points="50,48 44,58 56,58" fill="#39FF14"/>
+            <polygon points="38,35 32,22 44,30" fill="#39FF14" opacity="0.8"/>
+            <polygon points="62,35 68,22 56,30" fill="#39FF14" opacity="0.8"/>
+          </svg>
+        </div>
+        <span class="brand-main">MUBRA</span><span class="brand-sub">FX</span>
+      </div>
+      <div class="footer-socials">
+        <a href="#" class="social-icon" aria-label="Telegram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.667l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.978.892z"/></svg>
+        </a>
+        <a href="#" class="social-icon" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+        </a>
+        <a href="#" class="social-icon" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        </a>
+        <a href="#" class="social-icon" aria-label="X Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
+      <p class="footer-copy">© 2025 MUBRA FX. All rights reserved. Trading involves substantial risk.</p>
+    </div>
+  </footer>
+
+</div><!-- /dashboard -->
+
+<!-- ── CHATBASE AI WIDGET PLACEHOLDER ─────────────────────────────────────────
+     Replace the block below with your actual Chatbase embed script:
+     <script>
+       window.embeddedChatbotConfig = { chatbotId: "YOUR_CHATBOT_ID", domain: "www.chatbase.co" }
+     </script>
+     <script src="https://www.chatbase.co/embed.min.js" chatbotId="YOUR_CHATBOT_ID" domain="www.chatbase.co" defer></script>
+────────────────────────────────────────────────────────────────────────────── -->
+
+<script src="script.js"></script>
+</body>
+</html>

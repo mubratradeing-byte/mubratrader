@@ -120,18 +120,18 @@ input, select, textarea {
 
 /* Wolf Logo */
 .wolf-logo {
-  width: 72px;
-  height: 72px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
-  border: 2px solid var(--green);
-  padding: 6px;
-  box-shadow: 0 0 20px var(--green-glow), inset 0 0 15px rgba(57,255,20,0.05);
+  border: 3px solid var(--green);
+  padding: 2px;
+  box-shadow: 0 0 25px var(--green-glow), 0 0 50px rgba(57,255,20,0.15), inset 0 0 15px rgba(57,255,20,0.05);
   flex-shrink: 0;
   animation: logoGlow 3s ease-in-out infinite;
 }
 
-.wolf-logo--sm { width: 44px; height: 44px; padding: 4px; }
-.wolf-logo--xs { width: 32px; height: 32px; padding: 3px; }
+.wolf-logo--sm { width: 70px; height: 70px; padding: 2px; }
+.wolf-logo--xs { width: 44px; height: 44px; padding: 2px; }
 
 @keyframes logoGlow {
   0%, 100% { box-shadow: 0 0 20px var(--green-glow); }
